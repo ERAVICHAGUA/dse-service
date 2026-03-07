@@ -6,7 +6,8 @@ import com.engineai.dse.domain.repository.SimulationResultRepository;
 import com.engineai.dse.domain.repository.SimulationScenarioRepository;
 import com.engineai.dse.infrastructure.controller.CreateSimulationRequest;
 import org.springframework.stereotype.Service;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -15,6 +16,14 @@ public class SimulationService {
 
     private final SimulationScenarioRepository simulationScenarioRepository;
     private final SimulationResultRepository simulationResultRepository;
+
+    @Value("${services.tiie.base-url}")
+    private String tiieBaseUrl;
+
+    @Value("${services.crfe.base-url}")
+    private String crfeBaseUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public SimulationService(
             SimulationScenarioRepository simulationScenarioRepository,
