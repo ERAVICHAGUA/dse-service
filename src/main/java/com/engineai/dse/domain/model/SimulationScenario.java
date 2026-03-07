@@ -1,81 +1,41 @@
-package com.engineai.dse.config;
+package com.engineai.dse.domain.model;
 
-import com.engineai.dse.infrastructure.security.JwtAuthenticationFilter;
-import com.engineai.dse.infrastructure.security.RestAuthenticationEntryPoint;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-@Configuration
-public class SecurityConfig {
+@Entity
+@Table(name = "simulation_scenarios")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SimulationScenario {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            RestAuthenticationEntryPoint restAuthenticationEntryPoint
-    ) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
-    }
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    @Column(name = "scenario_type", nullable = false, length = 50)
+    private String scenarioType;
 
-        CorsConfiguration config = new CorsConfiguration();
+    @Column(name = "scenario_name", length = 100)
+    private String scenarioName;
 
-        config.setAllowedOrigins(List.of(
-                "https://devioz-frontend-777439108015.us-central1.run.app",
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"
-        ));
+    @Column(name = "input_payload", nullable = false, columnDefinition = "json")
+    private String inputPayload;
 
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
+    @Column(name = "status", nullable = false, length = 30)
+    private String status;
 
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(false);
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(
-                                "/actuator/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                );
-
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
+    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
 }
